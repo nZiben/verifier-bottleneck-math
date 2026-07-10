@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 # Colab install script for verifier-bottleneck-math.
-#
-# Install ORDER matters: torch -> vllm==0.8.3 -> flash-attn -> verl -> ray.
-# vLLM (and, less predictably, verl's own transitive deps) can silently
-# replace the installed torch/vllm build if installed out of order or without
-# --no-deps guards, so every step re-checks torch's version afterward.
-#
-# Idempotent: safe to re-run on the same runtime — each step skips reinstalling
-# a package that's already at the pinned version.
 set -euo pipefail
 
 TORCH_PIN="2.6.0"
