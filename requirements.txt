@@ -1,0 +1,5 @@
+torch==2.6.0
+vllm==0.8.3
+flash-attn  # installed with --no-build-isolation by scripts/colab_install.sh
+verl==0.8.0
+ray[default]
