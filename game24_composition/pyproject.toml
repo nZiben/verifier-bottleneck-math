@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "game24-composition"
+version = "0.1.0"
+description = "Symbolic Game24 composition sandbox for verifier bottleneck experiments"
+requires-python = ">=3.10"
+dependencies = [
+  "torch",
+  "transformers",
+  "peft",
+  "accelerate",
+  "pyyaml",
+  "matplotlib",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

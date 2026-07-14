@@ -1,0 +1,45 @@
+seed: 42
+
+data:
+  out_dir: data/synthetic
+  value_min: 1
+  value_max: 10
+  n_train_A: 3000
+  n_eval_A: 300
+  n_train_B: 3000
+  n_eval_B: 300
+  n_test_AB: 300
+
+model:
+  model_name: Qwen/Qwen2.5-0.5B-Instruct
+  fallback_model_name:
+  output_dir: runs/m_sep
+  epochs: 3
+  lr: 2.0e-4
+  batch_size: 4
+  grad_accum: 8
+  max_seq_len: 768
+  lora_r: 16
+  lora_alpha: 32
+
+evaluation:
+  max_new_tokens: 256
+  greedy_temperature: 0.0
+  pass_k: [1, 4, 16, 64, 256]
+  num_samples: 256
+  temperature: 0.7
+  top_p: 0.95
+
+exploration_sweep:
+  - temperature: 0.2
+    top_p: 0.9
+    num_samples: 16
+  - temperature: 0.7
+    top_p: 0.95
+    num_samples: 64
+  - temperature: 1.0
+    top_p: 0.95
+    num_samples: 128
+  - temperature: 1.2
+    top_p: 0.98
+    num_samples: 256
