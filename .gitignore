@@ -4,3 +4,26 @@ __pycache__/
 .venv/
 *.egg-info/
 CLAUDE.md
+
+# local secrets
+.env
+.env.*
+!.env.example
+game24_composition/.env
+game24_composition/.env.*
+!game24_composition/.env.example
+
+# generated experiment artifacts
+game24_composition/data/synthetic/*
+!game24_composition/data/synthetic/.gitkeep
+game24_composition/runs/*
+!game24_composition/runs/.gitkeep
+game24_composition/outputs/*
+!game24_composition/outputs/.gitkeep
+game24_composition/cloud_artifacts/
+
+# generated mod-p verifier artifacts
+modp_verifier_sandbox/outputs/*
+!modp_verifier_sandbox/outputs/.gitkeep
+modp_verifier_sandbox/checkpoints/*
+!modp_verifier_sandbox/checkpoints/.gitkeep

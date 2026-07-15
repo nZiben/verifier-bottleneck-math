@@ -33,6 +33,23 @@ bash run_first5.sh
 
 The script runs data generation, SFT, greedy A/B/AB evaluation, AB pass@k, and the exploration sweep. Training saves epoch checkpoints under `runs/m_sep/checkpoint-*`; checkpoints are not pruned unless you pass `--save_total_limit` directly to `train_sft.py`.
 
+## Cloud Env
+
+```bash
+cp .env.example .env
+bash check_yandex_env.sh
+```
+
+`.env` is ignored by git. Do not commit cloud credentials.
+
+If Yandex gives you a GPU VM hostname, set `GPU_HOST` and run:
+
+```bash
+bash run_remote_gpu.sh
+```
+
+It copies this package to the VM, runs `run_first5.sh`, and pulls back `runs/`, `outputs/`, `data/synthetic/`, and `run_first5.log` into `cloud_artifacts/`.
+
 ## 1. Generate Data
 
 ```bash
