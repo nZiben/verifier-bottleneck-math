@@ -1,0 +1,12 @@
+name: verifier-bottleneck-gpu-smoke
+desc: Collect a CUDA environment report for the initial infrastructure smoke test.
+cmd: >
+  python3 src/verifier_bottleneck/cli.py
+  --output ${REPORT}
+  --require-cuda
+env:
+  python: auto
+outputs:
+  - gpu-system-report.json: REPORT
+cloud-instance-types:
+  - gt4.1

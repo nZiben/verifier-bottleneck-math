@@ -4,3 +4,44 @@ __pycache__/
 .venv/
 *.egg-info/
 CLAUDE.md
+AGENTS.md
+docs/
+
+# Python environments and tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Research artifacts (never commit datasets or model state)
+data/
+datasets/
+artifacts/
+outputs/
+reports/
+checkpoints/
+models/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+
+# DataSphere local job logs and metadata
+job_progress.jsonl
+stdout.txt
+stderr.txt
+system.log
+gpu_stats.tsv
+docker_stats.tsv
+*-system-report.json
+*-dependency-report.json

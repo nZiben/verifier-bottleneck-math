@@ -1,0 +1,11 @@
+name: verifier-bottleneck-cpu-smoke
+desc: Collect a CPU environment report for the initial infrastructure smoke test.
+cmd: >
+  python3 src/verifier_bottleneck/cli.py
+  --output ${REPORT}
+env:
+  python: auto
+outputs:
+  - cpu-system-report.json: REPORT
+cloud-instance-types:
+  - c1.8
