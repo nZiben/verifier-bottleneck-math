@@ -1,0 +1,21 @@
+name: verifier-bottleneck-gpu-dependencies-a100-smoke
+desc: Build the common GPU environment on an A100 and measure dependency import time.
+cmd: >
+  python3 -m verifier_bottleneck.dependency_report
+  --output ${REPORT}
+  --require-cuda
+env:
+  python:
+    type: manual
+    version: "3.10"
+    pip:
+      index-url: https://download.pytorch.org/whl/cu124
+      extra-index-urls:
+        - https://pypi.org/simple
+    requirements-file: requirements-rl-compositionality-gpu.txt
+    local-paths:
+      - src/verifier_bottleneck
+outputs:
+  - a100-dependency-report.json: REPORT
+cloud-instance-types:
+  - g2.1

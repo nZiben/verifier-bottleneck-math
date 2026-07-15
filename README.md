@@ -89,3 +89,61 @@ python scripts/submit_job.py jobs/cpu-smoke.yaml --execute
 
 The `--execute` form launches a paid cloud job. Repository checks and the helper's
 default dry-run mode never submit jobs.
+
+## GPU dependency timing smoke test
+
+The dependency benchmark adapts `PRIME-RL/RL-Compositionality` to DataSphere's
+managed Python environment. It does not copy the upstream Dockerfile. Each job's
+manual `env.python` section selects Python 3.10 and the common
+`requirements-rl-compositionality-gpu.txt` environment. It uploads
+`src/verifier_bottleneck` as a non-empty local module because the current
+DataSphere SDK cannot validate an empty manual `local-paths` list.
+
+Choose the GPU explicitly by selecting a job config:
+
+- `jobs/gpu-dependencies-t4-smoke.yaml`: T4 (`gt4.1`).
+- `jobs/gpu-dependencies-v100-smoke.yaml`: V100 (`g1.1`).
+- `jobs/gpu-dependencies-a100-smoke.yaml`: A100 (`g2.1`).
+
+The job installs and imports the upstream dependency surface without downloading
+a model or logging into Weights & Biases. `flash-attn` is excluded because the
+standard package is architecture-specific and upstream installs it separately
+with `--no-build-isolation`. Keeping it out makes the dependency comparison
+consistent across T4, V100, and A100. The original CPU and GPU system smoke jobs
+remain unchanged.
+
+The dependency requirements file intentionally contains only package specifiers.
+The DataSphere CLI parser does not accept the comment lines that ordinary `pip`
+requirements files allow. Dependency provenance and rationale are documented
+here instead of inside that file.
+
+The adaptation references these upstream `main` blobs:
+
+- `requirements.txt`: `fe6536f7e40a8c549033e98597bb34395daee364`
+- `pyproject.toml`: `c015cc011312b28abc51ec5d2b751e840f361812`
+- `Dockerfile`: `18c0727a0d40c71db45ad5b3a9acd4ad2090e2ca`
+
+Review the submission safely:
+
+```powershell
+$config = "jobs/gpu-dependencies-t4-smoke.yaml"
+python scripts/submit_job.py $config
+```
+
+After explicit budget approval, measure the end-to-end cold run while preserving
+DataSphere's live logs:
+
+```powershell
+$timer = [System.Diagnostics.Stopwatch]::StartNew()
+python scripts/submit_job.py $config --execute
+$jobExitCode = $LASTEXITCODE
+$timer.Stop()
+$timer.Elapsed
+"Job exit code: $jobExitCode"
+```
+
+The elapsed stopwatch includes client upload, environment preparation, and job
+execution. The selected GPU's dependency report records individual import
+durations, versions, failures, and CUDA/GPU details. DataSphere may reuse a cached
+environment on later runs, so distinguish the first cold run from subsequent
+warm runs.

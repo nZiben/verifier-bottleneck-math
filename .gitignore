@@ -43,3 +43,5 @@ stderr.txt
 system.log
 gpu_stats.tsv
 docker_stats.tsv
+*-system-report.json
+*-dependency-report.json
