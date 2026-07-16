@@ -1,0 +1,42 @@
+experiment_name: modular-addition-paper-scale
+description: Paper-scale grokking run for modular addition with verifier sweeps.
+tags:
+  - sandbox
+  - modular-addition
+  - grokking
+  - paper-candidate
+seed: 42
+device: auto
+output: outputs/modular-addition-paper-scale
+
+task:
+  modulus: 97
+  train_fraction: 0.5
+
+model:
+  layers: 2
+  d_model: 128
+  heads: 4
+  d_ff: 512
+  dropout: 0.0
+
+training:
+  steps: 100000
+  batch_size: 512
+  learning_rate: 0.001
+  weight_decay: 1.0
+  warmup_steps: 10
+  evaluation_interval: 1000
+
+verifier:
+  repetitions: 10
+  seed: 2026
+  operating_points:
+    - alpha: 1.0
+      beta: 1.0
+    - alpha: 0.9
+      beta: 0.1
+    - alpha: 0.75
+      beta: 0.25
+    - alpha: 1.0
+      beta: 0.0

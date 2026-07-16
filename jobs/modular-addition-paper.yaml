@@ -1,0 +1,31 @@
+name: verifier-bottleneck-modular-addition-paper
+desc: Run the paper-scale modular-addition grokking experiment on a T4 and export its full record.
+cmd: >
+  python3 -m verifier_bottleneck.jobs.modular_addition
+  --config ${CONFIG}
+  --archive ${ARCHIVE}
+  --record ${RECORD}
+  --summary ${SUMMARY}
+  --run-root .job-runs/modular-addition-paper
+  --device cuda
+env:
+  python:
+    type: manual
+    version: "3.10"
+    pip:
+      index-url: https://download.pytorch.org/whl/cu124
+      extra-index-urls:
+        - https://pypi.org/simple
+    requirements-file: requirements-sandbox-job.txt
+    local-paths:
+      - src/verifier_bottleneck
+inputs:
+  - configs/sandbox/modular_addition_paper.yaml: CONFIG
+  - pyproject.toml
+  - README.md
+outputs:
+  - modular-addition-paper.zip: ARCHIVE
+  - modular-addition-paper-record.json: RECORD
+  - modular-addition-paper-summary.json: SUMMARY
+cloud-instance-types:
+  - gt4.1

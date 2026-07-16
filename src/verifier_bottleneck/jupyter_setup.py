@@ -26,15 +26,19 @@ def validate_python_version(major: int, minor: int) -> None:
 
 
 def find_repository_root(start: Path) -> Path:
-    """Return the nearest parent containing the project metadata."""
+    """Return the nearest source checkout or staged DataSphere Job root."""
     resolved_start = start.resolve()
     candidates = (resolved_start, *resolved_start.parents)
     for candidate in candidates:
-        if (candidate / "pyproject.toml").is_file() and (candidate / "src").is_dir():
+        has_project_metadata = (candidate / "pyproject.toml").is_file()
+        has_source_layout = (candidate / "src" / "verifier_bottleneck").is_dir()
+        has_staged_package = (candidate / "verifier_bottleneck").is_dir()
+        if has_project_metadata and (has_source_layout or has_staged_package):
             return candidate
     raise ValueError(
         f"Could not find the repository root from {resolved_start}. "
-        "Open this notebook from inside the cloned repository."
+        "Expected pyproject.toml with either src/verifier_bottleneck or a "
+        "staged verifier_bottleneck package."
     )
 
 

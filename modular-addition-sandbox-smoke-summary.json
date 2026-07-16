@@ -1,0 +1,140 @@
+{
+  "best_metrics": {
+    "step": 0,
+    "test_accuracy": 0.06896551698446274,
+    "test_loss": 2.9559450149536133,
+    "train_accuracy": 0.0625,
+    "train_loss": 2.9708645343780518,
+    "verifier_measurements": [
+      {
+        "accepted_count": 7250,
+        "alpha": 1.0,
+        "base_accuracy": 0.06896551724137931,
+        "beta": 1.0,
+        "empirical_acceptance_rate": 1.0,
+        "empirical_accepted_accuracy": 0.06896551724137931,
+        "predicted_acceptance_rate": 1.0,
+        "predicted_accepted_accuracy": 0.06896551724137931,
+        "proposal_count": 7250
+      },
+      {
+        "accepted_count": 1107,
+        "alpha": 0.9,
+        "base_accuracy": 0.06896551724137931,
+        "beta": 0.1,
+        "empirical_acceptance_rate": 0.15268965517241379,
+        "empirical_accepted_accuracy": 0.4037940379403794,
+        "predicted_acceptance_rate": 0.15517241379310345,
+        "predicted_accepted_accuracy": 0.39999999999999997,
+        "proposal_count": 7250
+      },
+      {
+        "accepted_count": 2022,
+        "alpha": 0.75,
+        "base_accuracy": 0.06896551724137931,
+        "beta": 0.25,
+        "empirical_acceptance_rate": 0.2788965517241379,
+        "empirical_accepted_accuracy": 0.17804154302670624,
+        "predicted_acceptance_rate": 0.28448275862068967,
+        "predicted_accepted_accuracy": 0.1818181818181818,
+        "proposal_count": 7250
+      },
+      {
+        "accepted_count": 500,
+        "alpha": 1.0,
+        "base_accuracy": 0.06896551724137931,
+        "beta": 0.0,
+        "empirical_acceptance_rate": 0.06896551724137931,
+        "empirical_accepted_accuracy": 1.0,
+        "predicted_acceptance_rate": 0.06896551724137931,
+        "predicted_accepted_accuracy": 1.0,
+        "proposal_count": 7250
+      }
+    ]
+  },
+  "completed_at_utc": "2026-07-16T16:41:30.033121+00:00",
+  "config_sha256": "0df31b01185550ec628fbedc81a303c7cdcfa489d923e67a097c68e3aef929f0",
+  "cuda_runtime_version": null,
+  "dataset_fingerprint": "1dfc20421d432635d68354f751fd09bac08c6cd0fed606708adccc3232a2b008",
+  "dataset_name": "modular_addition_mod_17",
+  "description": "Fast pre-grokking validation of modular addition and noisy-verifier accuracy.",
+  "device": "cpu",
+  "duration_seconds": 2.980878688998928,
+  "error": null,
+  "experiment_name": "modular-addition-smoke",
+  "experiment_type": "modular_addition",
+  "final_metrics": {
+    "step": 300,
+    "test_accuracy": 0.03448275849223137,
+    "test_loss": 4.776144504547119,
+    "train_accuracy": 1.0,
+    "train_loss": 0.08034363389015198,
+    "verifier_measurements": [
+      {
+        "accepted_count": 7250,
+        "alpha": 1.0,
+        "base_accuracy": 0.034482758620689655,
+        "beta": 1.0,
+        "empirical_acceptance_rate": 1.0,
+        "empirical_accepted_accuracy": 0.034482758620689655,
+        "predicted_acceptance_rate": 1.0,
+        "predicted_accepted_accuracy": 0.034482758620689655,
+        "proposal_count": 7250
+      },
+      {
+        "accepted_count": 945,
+        "alpha": 0.9,
+        "base_accuracy": 0.034482758620689655,
+        "beta": 0.1,
+        "empirical_acceptance_rate": 0.13034482758620689,
+        "empirical_accepted_accuracy": 0.23597883597883598,
+        "predicted_acceptance_rate": 0.12758620689655173,
+        "predicted_accepted_accuracy": 0.24324324324324323,
+        "proposal_count": 7250
+      },
+      {
+        "accepted_count": 1911,
+        "alpha": 0.75,
+        "base_accuracy": 0.034482758620689655,
+        "beta": 0.25,
+        "empirical_acceptance_rate": 0.2635862068965517,
+        "empirical_accepted_accuracy": 0.09419152276295134,
+        "predicted_acceptance_rate": 0.26724137931034486,
+        "predicted_accepted_accuracy": 0.09677419354838708,
+        "proposal_count": 7250
+      },
+      {
+        "accepted_count": 250,
+        "alpha": 1.0,
+        "base_accuracy": 0.034482758620689655,
+        "beta": 0.0,
+        "empirical_acceptance_rate": 0.034482758620689655,
+        "empirical_accepted_accuracy": 1.0,
+        "predicted_acceptance_rate": 0.034482758620689655,
+        "predicted_accepted_accuracy": 1.0,
+        "proposal_count": 7250
+      }
+    ]
+  },
+  "git_commit": null,
+  "gpu_names": [],
+  "parameter_count": 14065,
+  "peak_gpu_memory_bytes": 0,
+  "pytorch_version": "2.6.0+cpu",
+  "record_path": "record.json",
+  "run_id": "20260716T164127.052257Z_0df31b0118",
+  "schema_version": "1.0",
+  "seed": 42,
+  "source_sha256": "b3cbce73221c4d633dc68ebca96737bc5dcbec61fbac481015037a8fcf0b6858",
+  "started_at_utc": "2026-07-16T16:41:27.052257+00:00",
+  "status": "completed",
+  "tags": [
+    "sandbox",
+    "modular-addition",
+    "smoke",
+    "verifier-formula"
+  ],
+  "test_examples": 145,
+  "train_examples": 144,
+  "trainable_parameter_count": 14065
+}
