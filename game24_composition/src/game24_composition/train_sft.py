@@ -26,6 +26,7 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--logging_steps", type=int, default=10)
     parser.add_argument("--save_total_limit", type=int, default=None)
+    parser.add_argument("--allow_ab", action="store_true")
     args = parser.parse_args()
 
     train(args)
@@ -43,16 +44,18 @@ def train(args):
 
     try:
         model_name_loaded = args.model_name
-        tokenizer, model = load_tokenizer_and_model(AutoTokenizer, AutoModelForCausalLM, args.model_name, torch)
+        tokenizer, model, is_peft = load_tokenizer_and_model(
+            AutoTokenizer, AutoModelForCausalLM, args.model_name, torch
+        )
     except Exception:
         if not args.fallback_model_name:
             raise
         model_name_loaded = args.fallback_model_name
-        tokenizer, model = load_tokenizer_and_model(
+        tokenizer, model, is_peft = load_tokenizer_and_model(
             AutoTokenizer, AutoModelForCausalLM, model_name_loaded, torch
         )
 
-    if args.lora_r > 0:
+    if args.lora_r > 0 and not is_peft:
         config = LoraConfig(
             r=args.lora_r,
             lora_alpha=args.lora_alpha,
@@ -66,7 +69,7 @@ def train(args):
 
     model.config.use_cache = False
     records = read_jsonl(args.train_file)
-    if any(row.get("task_type") == "AB_symbolic_game24" for row in records):
+    if not args.allow_ab and any(row.get("task_type") == "AB_symbolic_game24" for row in records):
         raise ValueError("M_sep training data must not contain AB composition examples.")
 
     class SFTDataset(Dataset):
@@ -135,11 +138,16 @@ def load_tokenizer_and_model(tokenizer_cls, model_cls, model_name, torch):
     tokenizer = tokenizer_cls.from_pretrained(model_name, trust_remote_code=True, use_fast=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    return tokenizer, load_causal_model(model_cls, model_name, torch)
+    try:
+        from peft import AutoPeftModelForCausalLM
+
+        return tokenizer, load_causal_model(AutoPeftModelForCausalLM, model_name, torch, is_trainable=True), True
+    except Exception:
+        return tokenizer, load_causal_model(model_cls, model_name, torch), False
 
 
-def load_causal_model(model_cls, model_name, torch):
-    kwargs = {"trust_remote_code": True}
+def load_causal_model(model_cls, model_name, torch, **extra_kwargs):
+    kwargs = {"trust_remote_code": True, **extra_kwargs}
     if torch.cuda.is_available():
         kwargs["torch_dtype"] = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
     return model_cls.from_pretrained(model_name, **kwargs)
