@@ -135,36 +135,40 @@ echo "== Perfect-checker self-training =="
   --out "$OUTPUT_DIR/accepted_ab_train.jsonl" \
   --stats_out "$OUTPUT_DIR/accepted_ab_train.stats.json" \
   --max_per_task "$MAX_ACCEPTED_PER_TASK"
-"$PYTHON_BIN" -m game24_composition.train_sft \
-  --model_name "$SEP_RUN_DIR" \
-  --train_file "$OUTPUT_DIR/accepted_ab_train.jsonl" \
-  --output_dir "$ST_RUN_DIR" \
-  --epochs "$ST_EPOCHS" \
-  --lr "$LR" \
-  --batch_size "$BATCH_SIZE" \
-  --grad_accum "$GRAD_ACCUM" \
-  --max_seq_len "$MAX_SEQ_LEN" \
-  --lora_r "$LORA_R" \
-  --lora_alpha "$LORA_ALPHA" \
-  --seed "$SEED" \
-  --allow_ab
-"$PYTHON_BIN" -m game24_composition.evaluate \
-  --model_path "$ST_RUN_DIR" \
-  --splits "$DATA_DIR/eval_A.jsonl" "$DATA_DIR/eval_B.jsonl" "$DATA_DIR/test_AB.jsonl" \
-  --out "$OUTPUT_DIR/self_train_results.json" \
-  --temperature 0.0 \
-  --max_new_tokens 256 \
-  --seed "$SEED"
-"$PYTHON_BIN" -m game24_composition.evaluate \
-  --model_path "$ST_RUN_DIR" \
-  --splits "$DATA_DIR/test_AB.jsonl" \
-  --out "$OUTPUT_DIR/self_train_passk.json" \
-  --pass_k 1,4,16 \
-  --num_samples 16 \
-  --temperature 0.7 \
-  --top_p 0.95 \
-  --max_new_tokens 256 \
-  --seed "$SEED"
+if [ -s "$OUTPUT_DIR/accepted_ab_train.jsonl" ]; then
+  "$PYTHON_BIN" -m game24_composition.train_sft \
+    --model_name "$SEP_RUN_DIR" \
+    --train_file "$OUTPUT_DIR/accepted_ab_train.jsonl" \
+    --output_dir "$ST_RUN_DIR" \
+    --epochs "$ST_EPOCHS" \
+    --lr "$LR" \
+    --batch_size "$BATCH_SIZE" \
+    --grad_accum "$GRAD_ACCUM" \
+    --max_seq_len "$MAX_SEQ_LEN" \
+    --lora_r "$LORA_R" \
+    --lora_alpha "$LORA_ALPHA" \
+    --seed "$SEED" \
+    --allow_ab
+  "$PYTHON_BIN" -m game24_composition.evaluate \
+    --model_path "$ST_RUN_DIR" \
+    --splits "$DATA_DIR/eval_A.jsonl" "$DATA_DIR/eval_B.jsonl" "$DATA_DIR/test_AB.jsonl" \
+    --out "$OUTPUT_DIR/self_train_results.json" \
+    --temperature 0.0 \
+    --max_new_tokens 256 \
+    --seed "$SEED"
+  "$PYTHON_BIN" -m game24_composition.evaluate \
+    --model_path "$ST_RUN_DIR" \
+    --splits "$DATA_DIR/test_AB.jsonl" \
+    --out "$OUTPUT_DIR/self_train_passk.json" \
+    --pass_k 1,4,16 \
+    --num_samples 16 \
+    --temperature 0.7 \
+    --top_p 0.95 \
+    --max_new_tokens 256 \
+    --seed "$SEED"
+else
+  echo "No accepted AB samples; skipping self-training fine-tune."
+fi
 
 echo "== Noisy checker simulation =="
 "$PYTHON_BIN" -m game24_composition.noisy_checker_eval \
