@@ -16,6 +16,7 @@ SEED="${SEED:-42}"
 
 DATA_DIR="${DATA_DIR:-data/phase2}"
 OUTPUT_DIR="${OUTPUT_DIR:-outputs/phase2}"
+BASE_MODEL_DIR="${BASE_MODEL_DIR:-.cache/base_model}"
 B_RUN_DIR="${B_RUN_DIR:-runs/phase2_b_only}"
 SEP_RUN_DIR="${SEP_RUN_DIR:-runs/phase2_m_sep}"
 ST_RUN_DIR="${ST_RUN_DIR:-runs/phase2_self_train}"
@@ -42,6 +43,11 @@ mkdir -p "$DATA_DIR" "$OUTPUT_DIR" "$B_RUN_DIR" "$SEP_RUN_DIR" "$ST_RUN_DIR"
 echo "== Self check =="
 "$PYTHON_BIN" -m game24_composition.self_check
 
+echo "== Cache base model once =="
+"$PYTHON_BIN" -m game24_composition.cache_model \
+  --model_name "$MODEL_NAME" \
+  --out_dir "$BASE_MODEL_DIR"
+
 echo "== Generate phase 2 data =="
 "$PYTHON_BIN" -m game24_composition.generate_data \
   --out_dir "$DATA_DIR" \
@@ -54,14 +60,14 @@ echo "== Generate phase 2 data =="
 
 echo "== Base model before SFT =="
 "$PYTHON_BIN" -m game24_composition.evaluate \
-  --model_path "$MODEL_NAME" \
+  --model_path "$BASE_MODEL_DIR" \
   --splits "$DATA_DIR/eval_A.jsonl" "$DATA_DIR/eval_B.jsonl" "$DATA_DIR/test_AB.jsonl" \
   --out "$OUTPUT_DIR/base_model_results.json" \
   --temperature 0.0 \
   --max_new_tokens 256 \
   --seed "$SEED"
 "$PYTHON_BIN" -m game24_composition.evaluate \
-  --model_path "$MODEL_NAME" \
+  --model_path "$BASE_MODEL_DIR" \
   --splits "$DATA_DIR/test_AB.jsonl" \
   --out "$OUTPUT_DIR/base_model_passk.json" \
   --pass_k 1,4,16,64 \
@@ -73,7 +79,7 @@ echo "== Base model before SFT =="
 
 echo "== Train B-only =="
 "$PYTHON_BIN" -m game24_composition.train_sft \
-  --model_name "$MODEL_NAME" \
+  --model_name "$BASE_MODEL_DIR" \
   --train_file "$DATA_DIR/train_B.jsonl" \
   --output_dir "$B_RUN_DIR" \
   --epochs "$B_EPOCHS" \
@@ -94,7 +100,7 @@ echo "== Train B-only =="
 
 echo "== Train stronger A+B =="
 "$PYTHON_BIN" -m game24_composition.train_sft \
-  --model_name "$MODEL_NAME" \
+  --model_name "$BASE_MODEL_DIR" \
   --train_file "$DATA_DIR/train_sep.jsonl" \
   --output_dir "$SEP_RUN_DIR" \
   --epochs "$SEP_EPOCHS" \
