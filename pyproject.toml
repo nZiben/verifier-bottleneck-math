@@ -20,6 +20,7 @@ dev = [
 
 [project.scripts]
 verifier-bottleneck-report = "verifier_bottleneck.cli:main"
+verifier-bottleneck-jupyter-setup = "verifier_bottleneck.jupyter_setup:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
