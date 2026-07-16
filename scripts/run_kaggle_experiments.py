@@ -218,8 +218,18 @@ def status_label(status: Any) -> str:
 def wait_for_completion(api: Any, kernel_ref: str, poll_seconds: int) -> str:
     ok = {"complete", "kernelworkerstatus.complete"}
     bad = {"error", "failed", "cancel_acknowledged", "kernelworkerstatus.error", "kernelworkerstatus.cancel_acknowledged"}
+    poll_errors = 0
     while True:
-        response = api.kernels_status(kernel_ref)
+        try:
+            response = api.kernels_status(kernel_ref)
+            poll_errors = 0
+        except Exception as exc:
+            poll_errors += 1
+            print(f"{kernel_ref}: status poll failed ({poll_errors}/10): {exc!r}", flush=True)
+            if poll_errors >= 10:
+                raise
+            time.sleep(poll_seconds)
+            continue
         label = status_label(response.status)
         print(f"{kernel_ref}: {label}", flush=True)
         if label in ok:

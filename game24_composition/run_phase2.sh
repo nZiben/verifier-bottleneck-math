@@ -22,13 +22,13 @@ SEP_RUN_DIR="${SEP_RUN_DIR:-runs/phase2_m_sep}"
 ST_RUN_DIR="${ST_RUN_DIR:-runs/phase2_self_train}"
 
 N_TRAIN_A="${N_TRAIN_A:-3000}"
-N_EVAL_A="${N_EVAL_A:-300}"
-N_TRAIN_B="${N_TRAIN_B:-20000}"
-N_EVAL_B="${N_EVAL_B:-300}"
-N_TEST_AB="${N_TEST_AB:-300}"
+N_EVAL_A="${N_EVAL_A:-100}"
+N_TRAIN_B="${N_TRAIN_B:-8000}"
+N_EVAL_B="${N_EVAL_B:-100}"
+N_TEST_AB="${N_TEST_AB:-100}"
 
-B_EPOCHS="${B_EPOCHS:-8}"
-SEP_EPOCHS="${SEP_EPOCHS:-6}"
+B_EPOCHS="${B_EPOCHS:-4}"
+SEP_EPOCHS="${SEP_EPOCHS:-4}"
 ST_EPOCHS="${ST_EPOCHS:-2}"
 LR="${LR:-2e-4}"
 BATCH_SIZE="${BATCH_SIZE:-4}"
@@ -70,8 +70,8 @@ echo "== Base model before SFT =="
   --model_path "$BASE_MODEL_DIR" \
   --splits "$DATA_DIR/test_AB.jsonl" \
   --out "$OUTPUT_DIR/base_model_passk.json" \
-  --pass_k 1,4,16,64 \
-  --num_samples 64 \
+  --pass_k 1,4,16 \
+  --num_samples 16 \
   --temperature 0.7 \
   --top_p 0.95 \
   --max_new_tokens 256 \
@@ -122,22 +122,16 @@ echo "== Train stronger A+B =="
   --model_path "$SEP_RUN_DIR" \
   --splits "$DATA_DIR/test_AB.jsonl" \
   --out "$OUTPUT_DIR/strong_sep_passk.json" \
-  --pass_k 1,4,16,64,256 \
-  --num_samples 256 \
+  --pass_k 1,4,16,32 \
+  --num_samples 32 \
   --temperature 0.7 \
   --top_p 0.95 \
   --max_new_tokens 256 \
   --seed "$SEED"
-"$PYTHON_BIN" -m game24_composition.sweep_exploration \
-  --model_path "$SEP_RUN_DIR" \
-  --test_file "$DATA_DIR/test_AB.jsonl" \
-  --out_dir "$OUTPUT_DIR/strong_sep_exploration_sweep" \
-  --seed "$SEED"
-
 echo "== Perfect-checker self-training =="
 "$PYTHON_BIN" -m game24_composition.collect_accepted_ab \
   --examples "$DATA_DIR/test_AB.jsonl" \
-  --generations "$OUTPUT_DIR/strong_sep_exploration_sweep/generations.jsonl" \
+  --generations "$OUTPUT_DIR/strong_sep_passk_generations.jsonl" \
   --out "$OUTPUT_DIR/accepted_ab_train.jsonl" \
   --stats_out "$OUTPUT_DIR/accepted_ab_train.stats.json" \
   --max_per_task "$MAX_ACCEPTED_PER_TASK"
@@ -165,8 +159,8 @@ echo "== Perfect-checker self-training =="
   --model_path "$ST_RUN_DIR" \
   --splits "$DATA_DIR/test_AB.jsonl" \
   --out "$OUTPUT_DIR/self_train_passk.json" \
-  --pass_k 1,4,16,64 \
-  --num_samples 64 \
+  --pass_k 1,4,16 \
+  --num_samples 16 \
   --temperature 0.7 \
   --top_p 0.95 \
   --max_new_tokens 256 \
@@ -174,7 +168,7 @@ echo "== Perfect-checker self-training =="
 
 echo "== Noisy checker simulation =="
 "$PYTHON_BIN" -m game24_composition.noisy_checker_eval \
-  --generations "$OUTPUT_DIR/strong_sep_exploration_sweep/generations.jsonl" \
+  --generations "$OUTPUT_DIR/strong_sep_passk_generations.jsonl" \
   --out_json "$OUTPUT_DIR/noisy_checker_eval.json" \
   --out_csv "$OUTPUT_DIR/noisy_checker_eval.csv" \
   --seed "$SEED"
