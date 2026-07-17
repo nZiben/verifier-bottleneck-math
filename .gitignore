@@ -24,19 +24,20 @@ dist/
 *.key
 
 # Research artifacts (never commit datasets or model state)
-data/
-datasets/
-artifacts/
-outputs/
-reports/
-checkpoints/
-models/
+/data/
+/datasets/
+/artifacts/
+/outputs/
+/reports/
+/checkpoints/
+/models/
 *.ckpt
 *.pt
 *.pth
 *.safetensors
 
 # DataSphere local job logs and metadata
+/.job-runs/
 job_progress.jsonl
 stdout.txt
 stderr.txt

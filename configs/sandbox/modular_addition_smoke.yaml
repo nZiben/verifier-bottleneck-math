@@ -1,0 +1,42 @@
+experiment_name: modular-addition-smoke
+description: Fast pre-grokking validation of modular addition and noisy-verifier accuracy.
+tags:
+  - sandbox
+  - modular-addition
+  - smoke
+  - verifier-formula
+seed: 42
+device: auto
+output: outputs/modular-addition-smoke
+
+task:
+  modulus: 17
+  train_fraction: 0.5
+
+model:
+  layers: 1
+  d_model: 32
+  heads: 4
+  d_ff: 128
+  dropout: 0.0
+
+training:
+  steps: 300
+  batch_size: 128
+  learning_rate: 0.001
+  weight_decay: 1.0
+  warmup_steps: 10
+  evaluation_interval: 50
+
+verifier:
+  repetitions: 50
+  seed: 2026
+  operating_points:
+    - alpha: 1.0
+      beta: 1.0
+    - alpha: 0.9
+      beta: 0.1
+    - alpha: 0.75
+      beta: 0.25
+    - alpha: 1.0
+      beta: 0.0

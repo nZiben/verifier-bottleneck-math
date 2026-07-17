@@ -1,0 +1,31 @@
+name: verifier-bottleneck-countdown-symbolic-composition-scratch-single-seed
+desc: Pretrain exact symbol decoding, train numeric Countdown with replay, then test unseen composition.
+cmd: >
+  python3 -u -m verifier_bottleneck.jobs.countdown_composition
+  --config ${CONFIG}
+  --archive ${ARCHIVE}
+  --record ${RECORD}
+  --summary ${SUMMARY}
+  --run-root .job-runs/countdown-symbolic-composition-scratch-single-seed
+  --device cuda
+env:
+  python:
+    type: manual
+    version: "3.10"
+    pip:
+      index-url: https://download.pytorch.org/whl/cu124
+      extra-index-urls:
+        - https://pypi.org/simple
+    requirements-file: requirements-arithmetic-job.txt
+    local-paths:
+      - src/verifier_bottleneck
+inputs:
+  - configs/arithmetic/countdown_symbolic_composition_scratch_single_seed.yaml: CONFIG
+  - pyproject.toml
+  - README.md
+outputs:
+  - countdown-symbolic-composition-scratch-single-seed.zip: ARCHIVE
+  - countdown-symbolic-composition-scratch-single-seed-record.json: RECORD
+  - countdown-symbolic-composition-scratch-single-seed-summary.json: SUMMARY
+cloud-instance-types:
+  - gt4.1
