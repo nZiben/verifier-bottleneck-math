@@ -130,8 +130,34 @@ def kaggle_script(repo_url: str, branch: str, mode: str) -> str:
                 "BATCH_SIZE": "1",
                 "GRAD_ACCUM": "32",
             }})
+        elif MODE == "phase2_big_short":
+            game24_env.update({{
+                "MODEL_NAME": "Qwen/Qwen2.5-1.5B-Instruct",
+                "DATA_DIR": "data/phase2_big_short",
+                "OUTPUT_DIR": "outputs/phase2_big_short",
+                "BASE_MODEL_DIR": ".cache/base_model_big",
+                "B_RUN_DIR": "runs/phase2_big_short_b_only",
+                "SEP_RUN_DIR": "runs/phase2_big_short_m_sep",
+                "ST_RUN_DIR": "runs/phase2_big_short_self_train",
+                "N_TRAIN_A": "1000",
+                "N_EVAL_A": "50",
+                "N_TRAIN_B": "2000",
+                "N_EVAL_B": "50",
+                "N_TEST_AB": "50",
+                "B_EPOCHS": "1",
+                "SEP_EPOCHS": "1",
+                "ST_EPOCHS": "1",
+                "BATCH_SIZE": "1",
+                "GRAD_ACCUM": "32",
+                "BASE_PASS_K": "1,4,8",
+                "BASE_NUM_SAMPLES": "8",
+                "STRONG_PASS_K": "1,4,8,16",
+                "STRONG_NUM_SAMPLES": "16",
+                "SELF_PASS_K": "1,4,8",
+                "SELF_NUM_SAMPLES": "8",
+            }})
 
-        if MODE in {{"phase2", "phase2_big"}}:
+        if MODE in {{"phase2", "phase2_big", "phase2_big_short"}}:
             run("bash run_phase2.sh", cwd=REPO_DIR / "game24_composition", env=game24_env)
         else:
             run("bash run_first5.sh", cwd=REPO_DIR / "game24_composition", env=game24_env)
@@ -153,14 +179,14 @@ def kaggle_script(repo_url: str, branch: str, mode: str) -> str:
             f"- Game24 outputs: {{ARTIFACTS / 'game24_composition' / 'outputs'}}",
             f"- Game24 checkpoints: {{ARTIFACTS / 'game24_composition' / 'runs'}}",
         ]
-        if MODE not in {{"phase2", "phase2_big"}}:
+        if MODE not in {{"phase2", "phase2_big", "phase2_big_short"}}:
             summary.extend([
                 f"- Mod-p outputs: {{ARTIFACTS / 'modp_verifier_sandbox' / 'outputs'}}",
                 f"- Mod-p checkpoints: {{ARTIFACTS / 'modp_verifier_sandbox' / 'checkpoints'}}",
             ])
         summary.extend([
             "",
-            "Phase 2 includes base-model eval, stronger B, composition re-check, perfect-checker self-training, and noisy-checker simulation." if MODE in {{"phase2", "phase2_big"}} else "No noisy Game24 checker, self-training, RL, GSM8K, or MATH run is included.",
+            "Phase 2 includes base-model eval, stronger B, composition re-check, perfect-checker self-training, and noisy-checker simulation." if MODE in {{"phase2", "phase2_big", "phase2_big_short"}} else "No noisy Game24 checker, self-training, RL, GSM8K, or MATH run is included.",
         ])
         (ARTIFACTS / "kaggle_run_summary.md").write_text("\\n".join(summary) + "\\n", encoding="utf-8")
 
@@ -326,7 +352,10 @@ def write_report(path: Path, lines: list[str]) -> None:
 def append_downloaded_summary(lines: list[str], output_dir: Path, mode: str) -> None:
     if not mode.startswith("phase2"):
         return
-    preferred_part = "phase2_big/phase2_summary.md" if mode == "phase2_big" else "phase2/phase2_summary.md"
+    preferred_part = {
+        "phase2_big": "phase2_big/phase2_summary.md",
+        "phase2_big_short": "phase2_big_short/phase2_summary.md",
+    }.get(mode, "phase2/phase2_summary.md")
     summaries = [path for path in sorted(output_dir.rglob("phase2_summary.md")) if preferred_part in str(path)]
     summaries = summaries or sorted(output_dir.rglob("phase2_summary.md"))
     if summaries:
@@ -335,7 +364,7 @@ def append_downloaded_summary(lines: list[str], output_dir: Path, mode: str) -> 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=["full", "smoke", "phase2", "phase2_big"], default="full")
+    parser.add_argument("--mode", choices=["full", "smoke", "phase2", "phase2_big", "phase2_big_short"], default="full")
     parser.add_argument("--kaggle-root", type=Path, default=DEFAULT_KAGGLE_ROOT)
     parser.add_argument("--repo-url", default=DEFAULT_REPO_URL)
     parser.add_argument("--branch", default=DEFAULT_BRANCH)

@@ -37,6 +37,13 @@ MAX_SEQ_LEN="${MAX_SEQ_LEN:-768}"
 LORA_R="${LORA_R:-16}"
 LORA_ALPHA="${LORA_ALPHA:-32}"
 MAX_ACCEPTED_PER_TASK="${MAX_ACCEPTED_PER_TASK:-4}"
+MAX_NEW_TOKENS="${MAX_NEW_TOKENS:-256}"
+BASE_PASS_K="${BASE_PASS_K:-1,4,16}"
+BASE_NUM_SAMPLES="${BASE_NUM_SAMPLES:-16}"
+STRONG_PASS_K="${STRONG_PASS_K:-1,4,16,32}"
+STRONG_NUM_SAMPLES="${STRONG_NUM_SAMPLES:-32}"
+SELF_PASS_K="${SELF_PASS_K:-1,4,16}"
+SELF_NUM_SAMPLES="${SELF_NUM_SAMPLES:-16}"
 
 mkdir -p "$DATA_DIR" "$OUTPUT_DIR" "$B_RUN_DIR" "$SEP_RUN_DIR" "$ST_RUN_DIR"
 
@@ -64,17 +71,17 @@ echo "== Base model before SFT =="
   --splits "$DATA_DIR/eval_A.jsonl" "$DATA_DIR/eval_B.jsonl" "$DATA_DIR/test_AB.jsonl" \
   --out "$OUTPUT_DIR/base_model_results.json" \
   --temperature 0.0 \
-  --max_new_tokens 256 \
+  --max_new_tokens "$MAX_NEW_TOKENS" \
   --seed "$SEED"
 "$PYTHON_BIN" -m game24_composition.evaluate \
   --model_path "$BASE_MODEL_DIR" \
   --splits "$DATA_DIR/test_AB.jsonl" \
   --out "$OUTPUT_DIR/base_model_passk.json" \
-  --pass_k 1,4,16 \
-  --num_samples 16 \
+  --pass_k "$BASE_PASS_K" \
+  --num_samples "$BASE_NUM_SAMPLES" \
   --temperature 0.7 \
   --top_p 0.95 \
-  --max_new_tokens 256 \
+  --max_new_tokens "$MAX_NEW_TOKENS" \
   --seed "$SEED"
 
 echo "== Train B-only =="
@@ -95,7 +102,7 @@ echo "== Train B-only =="
   --splits "$DATA_DIR/eval_B.jsonl" \
   --out "$OUTPUT_DIR/b_only_results.json" \
   --temperature 0.0 \
-  --max_new_tokens 256 \
+  --max_new_tokens "$MAX_NEW_TOKENS" \
   --seed "$SEED"
 
 echo "== Train stronger A+B =="
@@ -116,17 +123,17 @@ echo "== Train stronger A+B =="
   --splits "$DATA_DIR/eval_A.jsonl" "$DATA_DIR/eval_B.jsonl" "$DATA_DIR/test_AB.jsonl" \
   --out "$OUTPUT_DIR/strong_sep_results.json" \
   --temperature 0.0 \
-  --max_new_tokens 256 \
+  --max_new_tokens "$MAX_NEW_TOKENS" \
   --seed "$SEED"
 "$PYTHON_BIN" -m game24_composition.evaluate \
   --model_path "$SEP_RUN_DIR" \
   --splits "$DATA_DIR/test_AB.jsonl" \
   --out "$OUTPUT_DIR/strong_sep_passk.json" \
-  --pass_k 1,4,16,32 \
-  --num_samples 32 \
+  --pass_k "$STRONG_PASS_K" \
+  --num_samples "$STRONG_NUM_SAMPLES" \
   --temperature 0.7 \
   --top_p 0.95 \
-  --max_new_tokens 256 \
+  --max_new_tokens "$MAX_NEW_TOKENS" \
   --seed "$SEED"
 echo "== Perfect-checker self-training =="
 "$PYTHON_BIN" -m game24_composition.collect_accepted_ab \
@@ -154,17 +161,17 @@ if [ -s "$OUTPUT_DIR/accepted_ab_train.jsonl" ]; then
     --splits "$DATA_DIR/eval_A.jsonl" "$DATA_DIR/eval_B.jsonl" "$DATA_DIR/test_AB.jsonl" \
     --out "$OUTPUT_DIR/self_train_results.json" \
     --temperature 0.0 \
-    --max_new_tokens 256 \
+    --max_new_tokens "$MAX_NEW_TOKENS" \
     --seed "$SEED"
   "$PYTHON_BIN" -m game24_composition.evaluate \
     --model_path "$ST_RUN_DIR" \
     --splits "$DATA_DIR/test_AB.jsonl" \
     --out "$OUTPUT_DIR/self_train_passk.json" \
-    --pass_k 1,4,16 \
-    --num_samples 16 \
+    --pass_k "$SELF_PASS_K" \
+    --num_samples "$SELF_NUM_SAMPLES" \
     --temperature 0.7 \
     --top_p 0.95 \
-    --max_new_tokens 256 \
+    --max_new_tokens "$MAX_NEW_TOKENS" \
     --seed "$SEED"
 else
   echo "No accepted AB samples; skipping self-training fine-tune."
