@@ -118,8 +118,20 @@ def kaggle_script(repo_url: str, branch: str, mode: str) -> str:
                 "GRAD_ACCUM": "8",
             }})
             modp_env.update({{"EPOCHS": "5", "P": "17"}})
+        elif MODE == "phase2_big":
+            game24_env.update({{
+                "MODEL_NAME": "Qwen/Qwen2.5-1.5B-Instruct",
+                "DATA_DIR": "data/phase2_big",
+                "OUTPUT_DIR": "outputs/phase2_big",
+                "BASE_MODEL_DIR": ".cache/base_model_big",
+                "B_RUN_DIR": "runs/phase2_big_b_only",
+                "SEP_RUN_DIR": "runs/phase2_big_m_sep",
+                "ST_RUN_DIR": "runs/phase2_big_self_train",
+                "BATCH_SIZE": "1",
+                "GRAD_ACCUM": "32",
+            }})
 
-        if MODE == "phase2":
+        if MODE in {{"phase2", "phase2_big"}}:
             run("bash run_phase2.sh", cwd=REPO_DIR / "game24_composition", env=game24_env)
         else:
             run("bash run_first5.sh", cwd=REPO_DIR / "game24_composition", env=game24_env)
@@ -141,14 +153,14 @@ def kaggle_script(repo_url: str, branch: str, mode: str) -> str:
             f"- Game24 outputs: {{ARTIFACTS / 'game24_composition' / 'outputs'}}",
             f"- Game24 checkpoints: {{ARTIFACTS / 'game24_composition' / 'runs'}}",
         ]
-        if MODE != "phase2":
+        if MODE not in {{"phase2", "phase2_big"}}:
             summary.extend([
                 f"- Mod-p outputs: {{ARTIFACTS / 'modp_verifier_sandbox' / 'outputs'}}",
                 f"- Mod-p checkpoints: {{ARTIFACTS / 'modp_verifier_sandbox' / 'checkpoints'}}",
             ])
         summary.extend([
             "",
-            "Phase 2 includes base-model eval, stronger B, composition re-check, perfect-checker self-training, and noisy-checker simulation." if MODE == "phase2" else "No noisy Game24 checker, self-training, RL, GSM8K, or MATH run is included.",
+            "Phase 2 includes base-model eval, stronger B, composition re-check, perfect-checker self-training, and noisy-checker simulation." if MODE in {{"phase2", "phase2_big"}} else "No noisy Game24 checker, self-training, RL, GSM8K, or MATH run is included.",
         ])
         (ARTIFACTS / "kaggle_run_summary.md").write_text("\\n".join(summary) + "\\n", encoding="utf-8")
 
@@ -312,16 +324,18 @@ def write_report(path: Path, lines: list[str]) -> None:
 
 
 def append_downloaded_summary(lines: list[str], output_dir: Path, mode: str) -> None:
-    if mode != "phase2":
+    if not mode.startswith("phase2"):
         return
-    summaries = sorted(output_dir.rglob("phase2_summary.md"))
+    preferred_part = "phase2_big/phase2_summary.md" if mode == "phase2_big" else "phase2/phase2_summary.md"
+    summaries = [path for path in sorted(output_dir.rglob("phase2_summary.md")) if preferred_part in str(path)]
+    summaries = summaries or sorted(output_dir.rglob("phase2_summary.md"))
     if summaries:
         lines.extend(["", "### Downloaded Phase 2 Summary", "", summaries[0].read_text(encoding="utf-8").strip()])
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=["full", "smoke", "phase2"], default="full")
+    parser.add_argument("--mode", choices=["full", "smoke", "phase2", "phase2_big"], default="full")
     parser.add_argument("--kaggle-root", type=Path, default=DEFAULT_KAGGLE_ROOT)
     parser.add_argument("--repo-url", default=DEFAULT_REPO_URL)
     parser.add_argument("--branch", default=DEFAULT_BRANCH)
@@ -347,7 +361,7 @@ def main() -> None:
     output_dir = args.results_dir / args.slug
 
     lines = [
-        "## Второй этап экспериментов" if args.mode == "phase2" else "## Kaggle Run",
+        "## Второй этап экспериментов" if args.mode.startswith("phase2") else "## Kaggle Run",
         "",
         f"- Started UTC: {started}",
         f"- Kernel: `{kernel_ref}`",
