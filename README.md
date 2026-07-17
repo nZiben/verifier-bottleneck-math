@@ -5,6 +5,9 @@ search and exploration. DataSphere JupyterLab is the primary interactive
 development environment; standalone Jobs remain available for approved batch
 runs.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the module boundaries and extension
+checklist for datasets, model backends, and experiment protocols.
+
 ## DataSphere JupyterLab quick start
 
 Open DataSphere project `bt1k0f436ik4qgb96r7s` in JupyterLab. Clone this
@@ -262,6 +265,61 @@ The Job returns `modular-addition-paper-record.json`,
 The ZIP contains the checkpoint metrics, exact configuration, source manifest,
 and all other registered run artifacts. A single run is not sufficient for a
 paper claim; use additional reviewed configurations and seeds for replication.
+
+## Countdown A+B symbolic-composition Jobs
+
+The composition experiment trains only two separate skills:
+
+- A: decode a seeded arbitrary symbol such as `S2 -> 50`;
+- B: solve ordinary numeric Countdown using postfix pointer actions.
+
+It never trains on symbolic Countdown. At evaluation, the same held-out puzzles
+are rendered once numerically (B) and once with the learned symbols (unseen
+A+B). This directly measures the composition gap while the temperature sweep
+tests whether probabilistic decoding recovers symbolic A+B solutions.
+
+Training uses a two-phase curriculum. Phase 1 contains only isolated A examples
+and stops as soon as all 14 mappings decode exactly. Phase 2 contains about 10%
+isolated-A replay and 90% numeric-B examples. Checkpoint selection minimizes
+numeric-B validation loss among checkpoints that retain 14/14 Skill-A accuracy;
+A+B is excluded throughout.
+
+The scratch configuration uses a four-layer, roughly 3.43M-parameter transformer
+with width 256, eight attention heads, and a 32-token context block:
+
+```powershell
+python -m verifier_bottleneck.experiments.countdown_composition `
+  --config configs/arithmetic/countdown_symbolic_composition_scratch_single_seed.yaml `
+  --dry-run
+python scripts/submit_job.py `
+  jobs/countdown-symbolic-composition-scratch-single-seed.yaml
+```
+
+The pretrained comparison uses a rank-16 LoRA adapter on the pinned
+`Qwen/Qwen2.5-0.5B-Instruct` revision:
+
+```powershell
+python -m verifier_bottleneck.experiments.qwen_countdown_composition `
+  --config configs/arithmetic/countdown_symbolic_composition_qwen_single_seed.yaml `
+  --dry-run
+python scripts/submit_job.py `
+  jobs/countdown-symbolic-composition-qwen-single-seed.yaml
+```
+
+The preview commands do not launch paid compute. Add `--execute` to exactly one
+`submit_job.py` command only after explicit budget approval. The Qwen Job also
+downloads the public pretrained model.
+
+Each Job returns a canonical record, summary, and ZIP containing TensorBoard
+events, the validation-selected checkpoint or adapter, the symbol codebook,
+the temperature table/plot, and paired per-task B/A+B proposal outcomes.
+
+Analyze a returned composition ZIP with:
+
+```powershell
+python scripts/analyze_arithmetic_job.py `
+  .\countdown-symbolic-composition-scratch-single-seed.zip
+```
 
 ## GPU dependency timing smoke test
 

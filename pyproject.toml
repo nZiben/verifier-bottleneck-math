@@ -25,6 +25,8 @@ sandbox = [
 verifier-bottleneck-report = "verifier_bottleneck.cli:main"
 verifier-bottleneck-jupyter-setup = "verifier_bottleneck.jupyter_setup:main"
 verifier-bottleneck-mod-add = "verifier_bottleneck.experiments.modular_addition:main"
+verifier-bottleneck-countdown-composition = "verifier_bottleneck.experiments.countdown_composition:main"
+verifier-bottleneck-qwen-countdown-composition = "verifier_bottleneck.experiments.qwen_countdown_composition:main"
 verifier-bottleneck-compare = "verifier_bottleneck.experiment_comparison:main"
 
 [tool.setuptools.packages.find]
@@ -49,7 +51,11 @@ strict = true
 files = ["src"]
 
 [[tool.mypy.overrides]]
-module = "verifier_bottleneck.training.tiny_transformer"
+module = [
+    "verifier_bottleneck.training.tiny_transformer",
+    "verifier_bottleneck.training.countdown_composition_transformer",
+    "verifier_bottleneck.training.qwen_countdown_composition",
+]
 ignore_missing_imports = true
 disallow_subclassing_any = false
 warn_return_any = false

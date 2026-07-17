@@ -1,0 +1,51 @@
+experiment_name: countdown-symbolic-composition-qwen-single-seed
+description: Extended Qwen LoRA training on isolated A and B, followed by a seven-temperature evaluation of unseen symbolic A+B.
+tags:
+  - countdown
+  - symbolic-composition
+  - temperature-sweep
+  - qwen2.5
+  - lora
+  - extended-training
+  - single-seed
+seed: 42
+device: auto
+output: outputs/countdown-symbolic-composition-qwen-single-seed
+
+task:
+  countdown_train_examples: 10000
+  countdown_validation_examples: 1000
+  countdown_test_examples: 64
+  countdown_minimum_target: 101
+  countdown_maximum_target: 999
+  symbol_seed: 20260717
+
+model:
+  pretrained_model: Qwen/Qwen2.5-0.5B-Instruct
+  revision: 7ae557604adf67be50417f59c2c2f167def9a775
+  lora_rank: 32
+  lora_alpha: 64
+  lora_dropout: 0.0
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+training:
+  skill_a_pretraining_max_steps: 50
+  skill_a_pretraining_evaluation_interval: 5
+  skill_a_replay_fraction: 0.1
+  steps: 600
+  micro_batch_size: 8
+  gradient_accumulation_steps: 16
+  learning_rate: 0.0002
+  weight_decay: 0.01
+  warmup_steps: 50
+  maximum_gradient_norm: 1.0
+  log_interval: 10
+  evaluation_interval: 50
+  early_stopping_patience: 5
+  early_stopping_min_delta: 0.001
+
+evaluation:
+  temperatures: [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5]
+  pass_k: [1, 16, 64, 128, 256]
+  proposal_batch_size: 64
+  seed: 20260717

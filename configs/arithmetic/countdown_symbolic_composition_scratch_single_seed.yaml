@@ -1,0 +1,47 @@
+experiment_name: countdown-symbolic-composition-scratch-single-seed
+description: Pretrain symbol decoding A to exact accuracy, train numeric Countdown B with A replay, then test unseen symbolic A+B.
+tags:
+  - countdown
+  - symbolic-composition
+  - temperature-sweep
+  - scratch-transformer
+  - single-seed
+seed: 42
+device: auto
+output: outputs/countdown-symbolic-composition-scratch-single-seed
+
+task:
+  countdown_train_examples: 10000
+  countdown_validation_examples: 1000
+  countdown_test_examples: 128
+  countdown_minimum_target: 101
+  countdown_maximum_target: 999
+  symbol_seed: 20260717
+
+model:
+  layers: 4
+  d_model: 256
+  heads: 8
+  d_ff: 1024
+  block_size: 32
+  dropout: 0.0
+
+training:
+  skill_a_pretraining_max_steps: 200
+  skill_a_pretraining_evaluation_interval: 10
+  skill_a_replay_fraction: 0.1
+  steps: 4000
+  batch_size: 256
+  learning_rate: 0.0003
+  weight_decay: 0.01
+  warmup_steps: 400
+  log_interval: 50
+  evaluation_interval: 500
+  early_stopping_patience: 4
+  early_stopping_min_delta: 0.0005
+
+evaluation:
+  temperatures: [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5]
+  pass_k: [1, 16, 64, 128, 256]
+  proposal_batch_size: 512
+  seed: 20260717
